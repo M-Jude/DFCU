@@ -11,7 +11,12 @@ exports.userBoard = async (req, res) => {
       CId: id,
       OutsAmount: {$gt:0}
     })
-    res.status(200).json(LoanStatus);
+
+    if(LoanStatus.length==0){
+      res.status(200).json({message: 'no loan found'})
+    }else{
+      res.status(200).json(LoanStatus);
+    }
   } catch (error) {
       // console.log(error.message);
       res.status(500).json({message: error.message})
