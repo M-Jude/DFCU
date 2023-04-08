@@ -1,6 +1,8 @@
 const express = require("express");
 const cors = require("cors");
-const dbConfig = require("./app/config/db.config");
+
+require('dotenv').config();
+
 
 const app = express();
 
@@ -16,16 +18,16 @@ app.use(express.json());
 // parse requests of content-type - application/x-www-form-urlencoded
 app.use(express.urlencoded({ extended: true }));
 
-const db = require("./app/models");
+const db = require("./api/models");
 const Role = db.role;
 
 db.mongoose
-  .connect(`mongodb+srv://admin:Book4424@cluster0.zt6h1eo.mongodb.net/LoanStatus-API?retryWrites=true&w=majority`, {
+  .connect(process.env.DATABASE_URI, {
     useNewUrlParser: true,
     useUnifiedTopology: true
   })
   .then(() => {
-    console.log("Successfully connect to MongoDB.");
+    console.log("Successfully connected to Database.");
     initial();
   })
   .catch(err => {
@@ -33,17 +35,12 @@ db.mongoose
     process.exit();
   });
 
-// simple route
-app.get("/", (req, res) => {
-  res.json({ message: "Welcome to bezkoder application." });
-});
-
 // routes
-require("./app/routes/auth.routes")(app);
-require("./app/routes/user.routes")(app);
+require("./api/routes/auth.routes")(app);
+require("./api/routes/user.routes")(app);
 
 // set port, listen for requests
-const PORT = process.env.PORT || 8080;
+const PORT = process.env.PORT || 8088;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}.`);
 });
