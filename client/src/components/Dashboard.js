@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
 
 import UserService from "../services/user.service";
+import Table from './DataTable'
 
 const BoardUser = () => {
   const [content, setContent] = useState([]);
+  const [noContent, setNoContent] = useState("NO LOAN FOUND");
 
   useEffect(() => {
     UserService.getUserBoard().then(
@@ -30,14 +32,7 @@ const BoardUser = () => {
         <h3>LOAN STATUS</h3>
       </header>
       <div>
-        {content.map((item, index) => (
-          <div key={index} style={{marginBottom: 20}}>
-            <div>Customer ID: {item.CId}</div>
-            <div>Loan ID: {item.LoanID}</div>
-            <div>Date of Disbursment: {item.DoDsbsnt}</div>
-            <div>Outstanding Amount: {item.OutsAmount}</div>
-          </div>
-        ))}
+        <Table/>
       </div>
     </div>
   );

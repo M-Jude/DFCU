@@ -3,7 +3,12 @@ const mongoose = require("mongoose");
 const User = mongoose.model(
   "User",
   new mongoose.Schema({
-    accNumber: String,
+    accNumber: {
+      type: String,
+      maxLength: 20,
+      required : true
+    },
+    accName: String,
     email: String,
     password: String,
     roles: [
