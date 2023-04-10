@@ -1,45 +1,82 @@
+const express = require("express");
+const cors = require("cors");
+
 require('dotenv').config();
 
-const express = require('express');
-const mongoose = require('mongoose');
-const Status = require('./models/loanModel');
-const User = require('./models/loginModel');
-const otpCode = require('./models/OTPVerification')
 
 const app = express();
-app.use(express.json()); 
 
-app.get('/', (req, res)=>{
-    res.send('API call test');
-})
+var corsOptions = {
+  origin: "http://localhost:8081"
+};
 
-app.get('/loan_status/:id', async(req, res)=>{
-    try {
-        const {id} = req.params;
-        const LoanStatus = await Status.find({CId: id})
-        res.status(200).json(LoanStatus);
-    } catch (error) {
-        // console.log(error.message);
-        res.status(500).json({message: error.message})
+app.use(cors());
+
+// parse requests of content-type - application/json
+app.use(express.json());
+
+// parse requests of content-type - application/x-www-form-urlencoded
+app.use(express.urlencoded({ extended: true }));
+
+const db = require("./api/models");
+const Role = db.role;
+
+db.mongoose
+  .connect(process.env.DATABASE_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+  })
+  .then(() => {
+    console.log("Successfully connected to Database.");
+    initial();
+  })
+  .catch(err => {
+    console.error("Connection error", err);
+    process.exit();
+  });
+
+// routes
+require("./api/routes/auth.routes")(app);
+require("./api/routes/user.routes")(app);
+
+// set port, listen for requests
+const PORT = process.env.PORT || 8088;
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}.`);
+});
+
+function initial() {
+  Role.estimatedDocumentCount((err, count) => {
+    if (!err && count === 0) {
+      new Role({
+        name: "user"
+      }).save(err => {
+        if (err) {
+          console.log("error", err);
+        }
+
+        console.log("added 'user' to roles collection");
+      });
+
+      new Role({
+        name: "moderator"
+      }).save(err => {
+        if (err) {
+          console.log("error", err);
+        }
+
+        console.log("added 'moderator' to roles collection");
+      });
+
+      new Role({
+        name: "admin"
+      }).save(err => {
+        if (err) {
+          console.log("error", err);
+        }
+
+        console.log("added 'admin' to roles collection");
+      });
     }
-})
-
-app.post('/loan_details', async(req, res)=>{
-    try {
-        const LoanDetails = await Status.create(req.body);
-        res.status(200).json(LoanDetails);
-    } catch (error) {
-        // console.log(error.message);
-        res.status(500).json({message: error.message})
-    }
-})
-
-mongoose.connect(process.env.DATABASE_URI)    
-.then(()=>{
-    console.log('Database connection Successful!');
-    app.listen(8088, ()=>{
-        console.log('Loan Status API => Started Successfully')
-    })
-}).catch((error)=>{
-    console.log(error)
-})
+  });
+}
